@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
-
+import React, { useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Facebook from "expo-facebook";
 import { Button } from "react-native-elements";
+import { useDispatch } from "react-redux";
 
 const PERMISSIONS = [
   "public_profile",
@@ -16,16 +17,33 @@ const APP_ID = "2835633236715709";
 const API_VERSION = "v8.0";
 
 export default LoginFacebookButton = () => {
+  const dispatch = useDispatch();
+
   useEffect(() => {
     Facebook.initializeAsync({ appId: APP_ID, version: API_VERSION });
   }, []);
 
   const facebookLogin = async () => {
     try {
-      const result = await Facebook.logInWithReadPermissionsAsync({
+      const { type, token } = await Facebook.logInWithReadPermissionsAsync({
         permissions: PERMISSIONS,
       });
-      console.log(result);
+
+      if (type === "success") {
+        console.log(token);
+        const response = await fetch(
+          `https://graph.facebook.com/v8.0/me?fields=id,name,email,accounts{name,app_id}&access_token=${token}`
+        );
+
+        const userInfo = await response.json();
+
+        dispatch({
+          type: "SET_FACEBOOK_ACCOUNT",
+          payload: { token, ...userInfo },
+        });
+
+        AsyncStorage.setItem("@token", token);
+      }
     } catch (error) {
       console.log(error);
     }
