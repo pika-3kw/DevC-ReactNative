@@ -4,8 +4,9 @@ import { StyleSheet, View, Text } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 
-import { Button } from "react-native-elements";
-import { Input } from "react-native-elements";
+import { Input, Button } from "react-native-elements";
+
+import LoginFacebookButton from "../components/LoginFacebookButton";
 
 export default Login = (props) => {
   return (
@@ -47,11 +48,7 @@ export default Login = (props) => {
 
       <Text style={{ color: "grey", marginVertical: 20 }}>OR</Text>
 
-      <Button
-        title="Login with Facebook"
-        buttonStyle={{ backgroundColor: "#1877F2" }}
-        containerStyle={{ width: "80%" }}
-      />
+      <LoginFacebookButton />
     </View>
   );
 };
