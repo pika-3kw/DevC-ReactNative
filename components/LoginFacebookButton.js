@@ -4,6 +4,8 @@ import * as Facebook from "expo-facebook";
 import { Button } from "react-native-elements";
 import { useDispatch } from "react-redux";
 
+import { FB_APP_ID, FB_APP_SECRET, FB_API_VERSION } from "@env";
+
 const PERMISSIONS = [
   "public_profile",
   "email",
@@ -13,33 +15,55 @@ const PERMISSIONS = [
   "pages_read_engagement",
 ];
 
-const APP_ID = "2835633236715709";
-const API_VERSION = "v8.0";
-
 export default LoginFacebookButton = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    Facebook.initializeAsync({ appId: APP_ID, version: API_VERSION });
+    Facebook.initializeAsync({ appId: FB_APP_ID, version: FB_API_VERSION });
   }, []);
+
+  const getToken = async () => {
+    const { type, token } = await Facebook.logInWithReadPermissionsAsync({
+      permissions: PERMISSIONS,
+    });
+    return { type, token };
+  };
+
+  const getUserInfo = async (token) => {
+    const response = await fetch(
+      `https://graph.facebook.com/v8.0/me?fields=id,name,email,accounts{name,app_id}&access_token=${token}`
+    );
+    let userInfo = await response.json();
+    userInfo.token = token;
+
+    return userInfo;
+  };
+
+  const getLongLivedToken = async (token) => {
+    try {
+      const response = await fetch(
+        `https://graph.facebook.com/${FB_API_VERSION}/oauth/access_token?grant_type=fb_exchange_token&client_id=${FB_APP_ID}&client_secret=${FB_APP_SECRET}&fb_exchange_token=${token}`
+      );
+
+      const json = await response.json();
+      return json.access_token;
+    } catch (error) {
+      console.log("err", error);
+    }
+  };
 
   const facebookLogin = async () => {
     try {
-      const { type, token } = await Facebook.logInWithReadPermissionsAsync({
-        permissions: PERMISSIONS,
-      });
+      let { type, token } = await getToken();
+
+      token = await getLongLivedToken(token);
 
       if (type === "success") {
-        console.log(token);
-        const response = await fetch(
-          `https://graph.facebook.com/v8.0/me?fields=id,name,email,accounts{name,app_id}&access_token=${token}`
-        );
-
-        const userInfo = await response.json();
+        let userInfo = await getUserInfo(token);
 
         dispatch({
           type: "SET_FACEBOOK_ACCOUNT",
-          payload: { token, ...userInfo },
+          payload: userInfo,
         });
 
         AsyncStorage.setItem("@token", token);
