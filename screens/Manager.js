@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 
-import { StyleSheet, View, Button, SafeAreaView } from "react-native";
+import { StyleSheet, View, Button } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { Header } from "react-native-elements";
+import { Entypo } from "@expo/vector-icons";
 
 import ListItem from "../components/ListItem";
 
@@ -10,6 +13,8 @@ export default Manager = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [data, setData] = useState([]);
+
+  const navigation = useNavigation();
 
   useEffect(() => {
     let controller = new AbortController();
@@ -33,15 +38,37 @@ export default Manager = (props) => {
     };
   }, [page]);
 
+  const menuButton = () => (
+    <Entypo
+      name="menu"
+      size={24}
+      color="white"
+      onPress={() => navigation.toggleDrawer()}
+    />
+  );
+
   return (
-    <View>
-      <SafeAreaView>
-        <Button
-          title="Add"
-          onPress={() => props.navigation.navigate("AddCampaign")}
-        />
-        <ListItem data={data} isLoading={isLoading} />
-      </SafeAreaView>
+    <View style={styles.screen}>
+      <Header
+        placement="left"
+        leftComponent={menuButton}
+        centerComponent={{
+          text: "CAMPAIGN MANAGER",
+          style: { color: "#fff" },
+        }}
+      />
+      <Button
+        title="Add"
+        color="green"
+        onPress={() => props.navigation.navigate("AddCampaign")}
+      />
+      <ListItem data={data} isLoading={isLoading} />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+});
