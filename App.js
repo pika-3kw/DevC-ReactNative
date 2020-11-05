@@ -2,10 +2,10 @@ import React, { useEffect } from "react";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { createStore } from "redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createDrawerNavigator } from "@react-navigation/drawer";
 
 import ManagerScreen from "./screens/Manager";
 import DetailScreen from "./screens/Detail";
@@ -17,8 +17,8 @@ import RegisterScreen from "./screens/Register";
 
 import rootReducer from "./reducers";
 
-const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
 
 const store = createStore(rootReducer);
 
@@ -54,7 +54,7 @@ const RenderApp = () => {
             type: "SET_FACEBOOK_ACCOUNT",
             payload: userInfo,
           });
-          console.log(userInfo);
+          // console.log(userInfo);
         }
       } catch (error) {
         console.log("Error:", error);
@@ -62,12 +62,41 @@ const RenderApp = () => {
     })();
   }, []);
 
-  const createCampaignsStack = () => (
+  const createCampaignStacks = () => (
     <Stack.Navigator>
-      <Stack.Screen name="Manager" component={ManagerScreen} />
-      <Stack.Screen name="Detail" component={DetailScreen} />
-      <Stack.Screen name="AddCampaign" component={AddCampaignScreen} />
-      <Stack.Screen name="Comments" component={CommentsScreen} />
+      <Stack.Screen
+        name="Manager"
+        component={ManagerScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Detail"
+        component={DetailScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="AddCampaign"
+        component={AddCampaignScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Comments"
+        component={CommentsScreen}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+
+  const createUserStacks = () => (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="User"
+        component={UserScreen}
+        options={{
+          title: "Profile",
+          headerShown: false,
+        }}
+      />
     </Stack.Navigator>
   );
 
@@ -81,22 +110,24 @@ const RenderApp = () => {
             headerShown: false,
           }}
         />
-        <Stack.Screen
-          name="Register"
-          component={RegisterScreen}
-          options={{
-            headerShown: false,
-          }}
-        />
+        <Stack.Screen name="Register" component={RegisterScreen} />
       </Stack.Navigator>
     );
   }
 
   return (
-    <Tab.Navigator>
-      <Tab.Screen name="Manager" component={createCampaignsStack} />
-      <Tab.Screen name="User" component={UserScreen} />
-    </Tab.Navigator>
+    <Drawer.Navigator initialRouteName="Manager">
+      <Drawer.Screen
+        name="Manager"
+        component={createCampaignStacks}
+        options={{ headerShown: false }}
+      />
+      <Drawer.Screen
+        name="User"
+        component={createUserStacks}
+        options={{ headerShown: false }}
+      />
+    </Drawer.Navigator>
   );
 };
 
