@@ -5,15 +5,18 @@ import { Avatar } from "react-native-elements";
 import { useNavigation } from "@react-navigation/native";
 import { Header } from "react-native-elements";
 import { Entypo } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default User = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
-  const logout = () => {
+  const logout = async () => {
     dispatch({
-      type: "REMOVE_FACEBOOK_ACCOUNT",
+      type: "REMOVE_USER",
     });
+
+    await AsyncStorage.clear();
   };
 
   const homeButton = () => (

@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-
+import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Provider, useDispatch, useSelector } from "react-redux";
@@ -17,6 +16,8 @@ import RegisterScreen from "./screens/Register";
 
 import rootReducer from "./reducers";
 
+import fbCheckToken from "./function/fbCheckToken";
+
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
@@ -27,39 +28,36 @@ const RenderApp = () => {
 
   const isAuth = useSelector((state) => state.user.isAuth);
 
-  const getTokenFromStorage = async () => {
-    const token = await AsyncStorage.getItem("@token");
+  const getJwtTokenFromStorage = async () => {
+    const token = await AsyncStorage.getItem("userJwtToken");
     return token;
   };
 
-  const getFacebookInfo = async (token) => {
-    const response = await fetch(
-      `https://graph.facebook.com/v8.0/me?fields=id,name,email,accounts{name,app_id}&access_token=${token}`
-    );
-
-    const userInfo = await response.json();
-    return userInfo;
+  const getUserInfoFromStorage = async () => {
+    const info = await AsyncStorage.getItem("userInfo");
+    return info;
   };
 
   useEffect(() => {
-    (async () => {
-      let token, userInfo;
-      try {
-        token = await getTokenFromStorage();
-        userInfo = await getFacebookInfo(token);
+    const start = async () => {
+      let jwtToken, info;
 
-        if (!userInfo.error) {
-          userInfo.token = token;
-          dispatch({
-            type: "SET_FACEBOOK_ACCOUNT",
-            payload: userInfo,
-          });
-          // console.log(userInfo);
+      try {
+        jwtToken = await getJwtTokenFromStorage();
+
+        const access = await fbCheckToken(jwtToken);
+
+        if (access) {
+          info = await getUserInfoFromStorage();
+          info = JSON.parse(info);
+          dispatch({ type: "SET_USER", jwtToken, info });
         }
       } catch (error) {
         console.log("Error:", error);
       }
-    })();
+    };
+
+    start();
   }, []);
 
   const createCampaignStacks = () => (
