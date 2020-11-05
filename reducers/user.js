@@ -1,15 +1,21 @@
 const initState = {
   isAuth: false,
-  facebookAccount: {},
+  info: {},
+  jwtToken: "",
 };
 
 export default user = (state = initState, action) => {
   switch (action.type) {
-    case "SET_FACEBOOK_ACCOUNT": {
-      return { ...state, isAuth: true, facebookAccount: action.payload };
+    case "SET_USER": {
+      return {
+        ...state,
+        isAuth: true,
+        info: action.info,
+        jwtToken: action.jwtToken,
+      };
     }
-    case "REMOVE_FACEBOOK_ACCOUNT": {
-      return { ...state, isAuth: false, facebookAccount: {} };
+    case "REMOVE_USER": {
+      return initState;
     }
     default:
       return state;

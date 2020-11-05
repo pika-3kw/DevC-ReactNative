@@ -1,13 +1,14 @@
-export const setFacebookAccount = (payload) => ({
-  type: "SET_FACEBOOK_ACCOUNT",
-  payload,
+export const setUser = (jwtToken, info) => ({
+  type: "SET_USER",
+  jwtToken,
+  info,
 });
 
-export const removeFacebookAccount = () => ({
-  type: "REMOVE_FACEBOOK_ACCOUNT",
+export const removeUser = () => ({
+  type: "REMOVE_USER",
 });
 
-export const VisibilityFilters = {
-  SET_FACEBOOK_ACCOUNT: "SET_FACEBOOK_ACCOUNT",
-  REMOVE_FACEBOOK_ACCOUNT: "REMOVE_FACEBOOK_ACCOUNT",
+export const constant = {
+  SET_USER: "SET_USER",
+  REMOVE_USER: "REMOVE_USER",
 };
