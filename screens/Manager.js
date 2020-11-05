@@ -1,26 +1,47 @@
-import React from "react";
-import { StyleSheet, View, Text, Button } from "react-native";
+import React, { useState, useEffect } from "react";
+
+import { StyleSheet, View, Button, SafeAreaView } from "react-native";
+
+import ListItem from "../components/ListItem";
+
+const URL = "https://giangnam-api.herokuapp.com/campaigns";
 
 export default Manager = (props) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    let controller = new AbortController();
+
+    const loadData = async () => {
+      try {
+        let response = await fetch(URL, { signal: controller.signal });
+        let dataFetch = await response.json();
+        setData(dataFetch);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.log(error);
+        }
+      }
+    };
+
+    loadData();
+
+    return () => {
+      controller.abort();
+    };
+  }, [page]);
+
   return (
-    <View style={styles.screen}>
-      <Text>Campaign screen</Text>
-      <Button
-        title="Go to Detail"
-        onPress={() => props.navigation.navigate("Detail")}
-      />
-      <Button
-        title="Go to Add Campaign"
-        onPress={() => props.navigation.navigate("AddCampaign")}
-      />
+    <View>
+      <SafeAreaView>
+        <Button
+          title="Add"
+          onPress={() => props.navigation.navigate("AddCampaign")}
+        />
+        <ListItem data={data} isLoading={isLoading} />
+      </SafeAreaView>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
