@@ -4,9 +4,10 @@ import * as Facebook from "expo-facebook";
 import { Button } from "react-native-elements";
 import { useDispatch } from "react-redux";
 
-import { FB_APP_ID, FB_API_VERSION } from "@env";
-
 import fbLogin from "../function/fbLogin";
+
+const FB_APP_ID = process.env.FB_APP_ID;
+const FB_API_VERSION = process.env.FB_API_VERSION;
 
 const PERMISSIONS = [
   "public_profile",

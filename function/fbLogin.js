@@ -1,5 +1,6 @@
-import { BACKEND_URL } from "@env";
 import axios from "axios";
+
+const BACKEND_URL = process.env.BACKEND_URL;
 
 export default async (token) => {
   try {
