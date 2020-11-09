@@ -6,8 +6,7 @@ import { useDispatch } from "react-redux";
 
 import fbLogin from "../function/fbLogin";
 
-const FB_APP_ID = process.env.FB_APP_ID;
-const FB_API_VERSION = process.env.FB_API_VERSION;
+import { FB_API_VERSION, FB_APP_ID } from "../constants";
 
 const PERMISSIONS = [
   "public_profile",
@@ -38,6 +37,8 @@ export default LoginFacebookButton = () => {
 
       if (type === "success") {
         let user = await fbLogin(token);
+
+        console.log(user);
 
         const { jwtToken, info } = user;
 
