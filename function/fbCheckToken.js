@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BACKEND_URL = process.env.BACKEND_URL;
+import { BACKEND_URL } from "../constants";
 
 export default async (jwtToken) => {
   try {
