@@ -58,7 +58,7 @@ export default Manager = (props) => {
         }}
       />
       <Button
-        title="Add"
+        title="Create New Campaign"
         color="green"
         onPress={() => props.navigation.navigate("AddCampaign")}
       />

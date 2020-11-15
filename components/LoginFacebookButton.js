@@ -38,8 +38,6 @@ export default LoginFacebookButton = () => {
       if (type === "success") {
         let user = await fbLogin(token);
 
-        console.log(user);
-
         const { jwtToken, info } = user;
 
         dispatch({
