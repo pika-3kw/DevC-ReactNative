@@ -8,7 +8,7 @@ import {
   FlatList,
 } from "react-native";
 
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import {
   ListItem,
@@ -29,7 +29,7 @@ export default AddCampaign = () => {
 
   const [isVisibleOverlay, setIsVisibleOverlay] = useState(false);
 
-  const [itemSelected, setItemSelected] = useState({});
+  const [itemSelected, setItemSelected] = useState(null);
 
   const [feed, setFeed] = useState([]);
 
@@ -37,6 +37,9 @@ export default AddCampaign = () => {
   const [campaignPosts, setCampaignPosts] = useState([]);
 
   const navigation = useNavigation();
+  const route = useRoute();
+
+  const updateData = route.params.updateData;
 
   const info = useSelector((state) => state.user.info);
 
@@ -47,12 +50,13 @@ export default AddCampaign = () => {
   fanpages = fanpages.map((item) => ({
     ...item,
     type: "fanpage",
-    onPress: () => {
-      setIsVisibleBottomSheet(false);
-      setIsVisibleOverlay(true);
-      setItemSelected(item);
-    },
   }));
+
+  const onSelectFanpage = (item) => {
+    setIsVisibleBottomSheet(false);
+    setIsVisibleOverlay(true);
+    setItemSelected(item);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -126,6 +130,8 @@ export default AddCampaign = () => {
       if (result.status === 201) {
         setCampaignName("");
         setCampaignPosts([]);
+        updateData(result.data);
+
         navigation.goBack();
       }
     } catch (error) {
@@ -167,7 +173,11 @@ export default AddCampaign = () => {
 
       <BottomSheet isVisible={isVisibleBottomSheet}>
         {fanpages.map((item) => (
-          <ListItem key={item.id} bottomDivider onPress={item.onPress}>
+          <ListItem
+            key={item.id}
+            bottomDivider
+            onPress={() => onSelectFanpage(item)}
+          >
             <Badge value={item.type} textStyle={{ color: "orange" }} />
             <ListItem.Content>
               <ListItem.Title>{item.name}</ListItem.Title>
@@ -177,26 +187,28 @@ export default AddCampaign = () => {
       </BottomSheet>
 
       <Overlay isVisible={isVisibleOverlay} fullScreen={true}>
-        {feed ? (
-          <ScrollView>
-            {feed.map((item) => (
-              <ListItem
-                key={item.id}
-                bottomDivider
-                onPress={() => handleSelectPost(item.id)}
-              >
-                <ListItem.Content>
-                  <ListItem.Title>{item.message}</ListItem.Title>
-                  <ListItem.Subtitle>{item.permalink_url}</ListItem.Subtitle>
-                  <ListItem.Subtitle>{item.created_time}</ListItem.Subtitle>
-                </ListItem.Content>
-              </ListItem>
-            ))}
-          </ScrollView>
-        ) : (
-          <Text>Nothing</Text>
-        )}
-        <Button title="Back" onPress={() => setIsVisibleOverlay(false)} />
+        <>
+          {feed ? (
+            <ScrollView>
+              {feed.map((item) => (
+                <ListItem
+                  key={item.id}
+                  bottomDivider
+                  onPress={() => handleSelectPost(item.id)}
+                >
+                  <ListItem.Content>
+                    <ListItem.Title>{item.message}</ListItem.Title>
+                    <ListItem.Subtitle>{item.permalink_url}</ListItem.Subtitle>
+                    <ListItem.Subtitle>{item.created_time}</ListItem.Subtitle>
+                  </ListItem.Content>
+                </ListItem>
+              ))}
+            </ScrollView>
+          ) : (
+            <Text>Loading...</Text>
+          )}
+          <Button title="Back" onPress={() => setIsVisibleOverlay(false)} />
+        </>
       </Overlay>
 
       <ButtonCreate onPress={handleSubmit} />

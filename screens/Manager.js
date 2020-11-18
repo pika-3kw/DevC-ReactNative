@@ -1,29 +1,74 @@
 import React, { useState, useEffect } from "react";
-
-import { StyleSheet, View, Button } from "react-native";
+import { useSelector } from "react-redux";
+import { StyleSheet, View, Button, LogBox } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { Header } from "react-native-elements";
+import { Header, BottomSheet, ListItem } from "react-native-elements";
 import { Entypo } from "@expo/vector-icons";
 
-import ListItem from "../components/ListItem";
+import { default as List } from "../components/ListItem";
 
-const URL = "https://giangnam-api.herokuapp.com/campaigns";
+import getCampaign from "../function/getCampaign";
+
+LogBox.ignoreLogs([
+  "Non-serializable values were found in the navigation state",
+]);
 
 export default Manager = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [data, setData] = useState([]);
+  const [selected, setSelected] = useState(null);
+
+  const [isVisibleOptions, setIsVisibleOptions] = useState(false);
+  const [options, setOptions] = useState([]);
+
+  const token = useSelector((state) => state.user.jwtToken);
 
   const navigation = useNavigation();
+
+  useEffect(() => {
+    if (selected != null) {
+      setIsVisibleOptions(true);
+      setOptions([
+        {
+          title: "Edit",
+          containerStyle: { backgroundColor: "green" },
+          titleStyle: { color: "white" },
+          onPress: () => {
+            setIsVisibleOptions(false);
+            // handle edit
+          },
+        },
+        {
+          title: "Remove",
+          containerStyle: { backgroundColor: "red" },
+          titleStyle: { color: "white" },
+          onPress: () => {
+            setIsVisibleOptions(false);
+            // handle remove
+          },
+        },
+        {
+          title: "Cancel",
+          onPress: () => {
+            setIsVisibleOptions(false);
+            console.log(selected);
+          },
+        },
+      ]);
+    }
+    return () => {
+      setSelected(null);
+    };
+  }, [selected]);
 
   useEffect(() => {
     let controller = new AbortController();
 
     const loadData = async () => {
       try {
-        let response = await fetch(URL, { signal: controller.signal });
-        let dataFetch = await response.json();
-        setData(dataFetch);
+        const campaigns = await getCampaign(token);
+        setData(campaigns);
       } catch (error) {
         if (error.name !== "AbortError") {
           console.log(error);
@@ -47,6 +92,10 @@ export default Manager = (props) => {
     />
   );
 
+  const updateData = (newData) => {
+    setData([...data, newData]);
+  };
+
   return (
     <View style={styles.screen}>
       <Header
@@ -57,12 +106,28 @@ export default Manager = (props) => {
           style: { color: "#fff" },
         }}
       />
+
       <Button
         title="Create New Campaign"
         color="green"
-        onPress={() => props.navigation.navigate("AddCampaign")}
+        onPress={() => props.navigation.navigate("AddCampaign", { updateData })}
       />
-      <ListItem data={data} isLoading={isLoading} />
+
+      <List data={data} isLoading={isLoading} setSelected={setSelected} />
+
+      <BottomSheet isVisible={isVisibleOptions}>
+        {options.map((l, i) => (
+          <ListItem
+            key={i}
+            containerStyle={l.containerStyle}
+            onPress={l.onPress}
+          >
+            <ListItem.Content>
+              <ListItem.Title style={l.titleStyle}>{l.title}</ListItem.Title>
+            </ListItem.Content>
+          </ListItem>
+        ))}
+      </BottomSheet>
     </View>
   );
 };
