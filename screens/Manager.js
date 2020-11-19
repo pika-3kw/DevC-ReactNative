@@ -8,6 +8,7 @@ import { Entypo } from "@expo/vector-icons";
 import { default as List } from "../components/ListItem";
 
 import getCampaign from "../function/getCampaign";
+import removeCampaign from "../function/removeCampaign";
 
 LogBox.ignoreLogs([
   "Non-serializable values were found in the navigation state",
@@ -43,9 +44,12 @@ export default Manager = (props) => {
           title: "Remove",
           containerStyle: { backgroundColor: "red" },
           titleStyle: { color: "white" },
-          onPress: () => {
+          onPress: async () => {
             setIsVisibleOptions(false);
-            // handle remove
+            const result = await removeCampaign(selected, token);
+            if (result.message === "OK") {
+              setData(data.filter((campaign) => campaign._id !== selected));
+            }
           },
         },
         {
